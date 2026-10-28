@@ -5,7 +5,19 @@ import { i18n } from "@i18n/translation";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
 import { getSortedPostsList } from "../utils/content-utils";
 
-const sortedPostsList = await getSortedPostsList();
+// 浏览器只接收归档所需字段，避免序列化口令和其他私有元数据。
+const sortedPostsList = (await getSortedPostsList()).map(
+	({ slug, url, data }) => ({
+		slug,
+		url,
+		data: {
+			title: data.title,
+			published: data.published,
+			tags: data.tags,
+			category: data.category,
+		},
+	}),
+);
 const archiveSummary = `${sortedPostsList.length} ${i18n(I18nKey.postsCount)}`;
 ---
 

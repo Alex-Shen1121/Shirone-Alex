@@ -1,6 +1,6 @@
 # 本博客的双仓工作流
 
-代码仓：`Alex-Shen1121/Shirone-Alex`。内容仓：`Alex-Shen1121/Shirone-Content`，是 `LyraVoid/Shirone-Content` 的公开 Fork。
+代码仓：`Alex-Shen1121/Shirone-Alex`。内容仓：`Alex-Shen1121/Shirone-Content`，作为独立私有仓库维护，不再同步原内容仓上游。网站地址为 `https://blog.codingshen.top/`。
 
 ## 文件归属
 
@@ -41,7 +41,9 @@ Vercel 关联代码仓，构建命令为 `pnpm build`，输出目录为 `dist`�
 
 - 构建默认读取根目录 `shirone.content.json` 中的远端内容源；本地 `.env` 不提交，也不上传到 Vercel。
 - Vercel 不应设置指向本机路径的 `CONTENT_DIR`。
-- 内容仓公开，构建时通过 HTTPS 读取，不需要额外的 GitHub 读取令牌。
+- 构建通过 SSH 的 443 端口读取私有内容仓。内容仓登记只读部署公钥，私钥以 `CONTENT_REPO_SSH_KEY` 保存到 Vercel 的生产、预览环境以及代码仓的 GitHub Actions Secret。
+- 私钥只用于构建期拉取内容；脚本将其写入权限为 `0600` 的临时文件，并在 Git 命令结束后清理。SSH 使用仓库内的 GitHub 官方主机公钥校验，不关闭主机验证。
+- 推送代码仓 `main` 会自动发布生产版本；其他代码分支用于预览，默认读取内容仓 `main`。
 - 内容仓的工作流会调用代码仓现有的内容校验流程。校验通过后，只有 `main` 分支会调用 `VERCEL_DEPLOY_HOOK`。
 - `VERCEL_DEPLOY_HOOK` 存放在内容仓的 GitHub Actions Secret 中。未配置时工作流会明确提示未部署。
 - 部署钩子只请求一次新构建，不代表部署已经成功。简单钩子方案读取构建时的内容分支；精确重建历史发布时，应使用具体的 `CONTENT_REPO_REF` 提交号。
@@ -52,4 +54,4 @@ Vercel 关联代码仓，构建命令为 `pnpm build`，输出目录为 `dist`�
 
 依次运行 `pnpm content:validate`、`pnpm content:sync`、`pnpm check`、`pnpm type-check`、`pnpm check:manifest` 和 `pnpm build`。内容同步测试与这些检查串行运行，避免测试夹具修改生成配置时相互干扰。
 
-内容仓为公开 Fork，文章源文件、草稿和配置都可以公开读取。不要在其中保存私密原文或服务凭据；此前发现的文章归档参数、相册原始配置泄露也未包含在本次迁移修复中。
+归档页仅向浏览器传递展示所需字段；生产构建会移除相册源配置 `images/albums/*/info.json`。文章和图片仍按主题的发布规则生成静态网站，私有仓库不等于网站访问控制。不要提交服务凭据；此前已经公开的 Git 历史也不会因仓库改为私有而从他人的副本中消失。

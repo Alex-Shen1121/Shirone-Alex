@@ -12,7 +12,7 @@
  *   node scripts/content/sync.mjs [--dry-run] [--watch] [--no-prune] [--quiet]
  */
 
-import { execFileSync } from "node:child_process";
+import { execContentGit } from "./git.mjs";
 import {
 	copyFileSync,
 	existsSync,
@@ -159,7 +159,7 @@ function copyPreservingMtime(sourcePath, targetPath) {
 
 function runGit(gitArgs, { cwd = ROOT, redact } = {}) {
 	try {
-		return execFileSync("git", gitArgs, {
+		return execContentGit(gitArgs, {
 			cwd,
 			encoding: "utf8",
 			stdio: ["ignore", "pipe", "pipe"],

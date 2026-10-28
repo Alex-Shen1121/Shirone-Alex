@@ -141,6 +141,7 @@ shirone-content/
 | `CONTENT_DIR` | 本地内容仓库绝对或相对路径。本地开发推荐直接写在 `.env` 中；CI 环境中配合仓库拉取使用 |
 | `CONTENT_REPO_URL` | 远端 Git 内容仓库地址（私有仓库可配合访问令牌使用，日志中会自动脱敏） |
 | `CONTENT_REPO_REF` | 指定内容仓分支、标签或 Commit SHA（默认为 `main`） |
+| `CONTENT_REPO_SSH_KEY` | 私有 GitHub 内容仓的只读 SSH 部署私钥，仅保存在构建环境的 Secret 中；搭配 `ssh://git@ssh.github.com:443/OWNER/REPO.git` 使用 |
 | `SHIRONE_CONTENT_SYNC` | 设为 `0` 或 `false` 时可强制关闭同步，临时回到单仓模式 |
 | `CONTENT_SYNC_PULL` | 设为 `false` 时离线复用已存在的本地临时缓存副本，不主动联网拉取 |
 

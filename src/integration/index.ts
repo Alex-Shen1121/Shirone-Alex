@@ -1,7 +1,7 @@
-import { existsSync } from "node:fs";
+import { existsSync, readdirSync, rmSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
-import { pathToFileURL } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import type { AstroIntegration } from "astro";
 import {
 	expressiveCodeShared,
@@ -475,6 +475,20 @@ export function shirones(options: ShironesOptions = {}): AstroIntegration {
 			},
 
 			"astro:build:done": async ({ dir, logger }) => {
+				// 相册配置可能含口令和原始清单，只能用于构建，不能作为静态文件发布。
+				const albumsDirectory = join(fileURLToPath(dir), "images", "albums");
+				if (existsSync(albumsDirectory)) {
+					for (const album of readdirSync(albumsDirectory, {
+						withFileTypes: true,
+					})) {
+						if (album.isDirectory()) {
+							rmSync(join(albumsDirectory, album.name, "info.json"), {
+								force: true,
+							});
+						}
+					}
+				}
+
 				// The theme's own repository keeps its `pagefind --site dist` CLI
 				// build step, which honours the repository's `pagefind.yml`
 				// (workers, exclusions, ...). Indexing here as well would build

@@ -87,6 +87,8 @@ jobs:
 
       - name: 同步博客内容与个人配置
         run: pnpm content:sync
+        env:
+          CONTENT_REPO_SSH_KEY: ${{ secrets.CONTENT_REPO_SSH_KEY }}
 
       - name: Run Biome
         continue-on-error: true
@@ -121,6 +123,8 @@ jobs:
 
       - name: 同步博客内容与个人配置
         run: pnpm content:sync
+        env:
+          CONTENT_REPO_SSH_KEY: ${{ secrets.CONTENT_REPO_SSH_KEY }}
 
       - name: Check Astro diagnostics
         run: pnpm exec astro check
@@ -167,6 +171,8 @@ jobs:
 
       - name: Build production site
         run: pnpm build
+        env:
+          CONTENT_REPO_SSH_KEY: ${{ secrets.CONTENT_REPO_SSH_KEY }}
 
   comment-tests:
     name: Comment regression fixtures
@@ -203,6 +209,8 @@ jobs:
 
       - name: 同步博客内容与个人配置
         run: pnpm content:sync
+        env:
+          CONTENT_REPO_SSH_KEY: ${{ secrets.CONTENT_REPO_SSH_KEY }}
 
       # Comments are off by default, so this run covers the zero-footprint cases.
       - name: Run comment, content and a11y regressions with comments disabled
@@ -312,6 +320,8 @@ jobs:
       - name: 同步博客内容与个人配置
         if: needs.changes.outputs.styles == 'true'
         run: pnpm content:sync
+        env:
+          CONTENT_REPO_SSH_KEY: ${{ secrets.CONTENT_REPO_SSH_KEY }}
 
       - name: Run style, banner and theme scheme regressions
         if: needs.changes.outputs.styles == 'true'

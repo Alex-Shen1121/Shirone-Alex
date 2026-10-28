@@ -2,6 +2,14 @@ import fs from "node:fs";
 import { expect, test } from "@playwright/test";
 
 test.describe("文章加密安全与防泄密", () => {
+	test("归档页不会把文章口令传给浏览器", async ({ request }) => {
+		const response = await request.get("/archive/");
+		expect(response.ok()).toBe(true);
+		const html = await response.text();
+		expect(html).toContain("encrypted-demo");
+		expect(html).not.toContain("shirone-secret");
+	});
+
 	test("静态 HTML 源码不包含任何未授权正文内容", async ({ page }) => {
 		const response = await page.goto("/posts/encrypted-demo/", {
 			waitUntil: "networkidle",

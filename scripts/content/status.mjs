@@ -8,7 +8,7 @@
  *   node scripts/content/status.mjs [--remote]
  */
 
-import { execFileSync } from "node:child_process";
+import { execContentGit } from "./git.mjs";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 import ts from "typescript";
@@ -111,8 +111,7 @@ function safeErrorText(error) {
 
 function runGit(gitArgs, cwd = ROOT, { timeout = 10_000 } = {}) {
 	try {
-		const output = execFileSync(
-			"git",
+		const output = execContentGit(
 			["--no-optional-locks", "-c", "core.quotepath=false", ...gitArgs],
 			{
 				cwd,

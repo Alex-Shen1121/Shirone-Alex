@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "source": {
     "type": "git",
-    "url": "https://github.com/Alex-Shen1121/Shirone-Content.git",
+    "url": "ssh://git@ssh.github.com:443/Alex-Shen1121/Shirone-Content.git",
     "ref": "main"
   },
   "mounts": {
