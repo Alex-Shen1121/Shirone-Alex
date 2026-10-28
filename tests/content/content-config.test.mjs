@@ -159,7 +159,10 @@ describe("读取内容仓配置", () => {
 			"site.yaml": "- 我是个数组\n",
 		});
 		try {
-			expectFailure(() => readConfigOverrides(directory), /must be a key-value mapping/i);
+			expectFailure(
+				() => readConfigOverrides(directory),
+				/must be a key-value mapping/i,
+			);
 		} finally {
 			rmSync(base, { recursive: true, force: true });
 		}
@@ -181,7 +184,10 @@ describe("读取内容仓配置", () => {
 			"site.yaml": "banner: &loop\n  homeText: *loop\n",
 		});
 		try {
-			expectFailure(() => readConfigOverrides(directory), /circular reference/i);
+			expectFailure(
+				() => readConfigOverrides(directory),
+				/circular reference/i,
+			);
 		} finally {
 			rmSync(base, { recursive: true, force: true });
 		}
@@ -200,17 +206,22 @@ describe("读取内容仓配置", () => {
 });
 
 describe("生成覆盖层模块", () => {
-	it("没有覆盖时与仓库里已提交的空模块完全一致", () => {
-		const committed = readFileSync(
-			new URL(`../../${GENERATED_CONFIG_FILE}`, import.meta.url),
-			"utf8",
-		);
-		// 没有这条一致性，local 模式下重新生成就会弄脏 git status。
-		// 比对前抹平换行：Windows 的 core.autocrlf 会把签出的文件变成 CRLF，
-		// 而生成器一律写 LF —— git 自己会归一化，这里也照做。
-		const normalize = (text) => text.split("\r\n").join("\n");
-		assert.equal(generateModule([]).source, EMPTY_MODULE);
-		assert.equal(normalize(committed), EMPTY_MODULE);
+	it("没有覆盖时生成空模块，且不会改写仅换行不同的已有文件", () => {
+		const { base, directory } = createConfigDirectory({});
+		const root = join(base, "theme");
+		const target = join(root, GENERATED_CONFIG_FILE);
+		const windowsSource = EMPTY_MODULE.replaceAll("\n", "\r\n");
+		try {
+			// 双仓工作区可以已有个人配置，空覆盖契约在独立目录验证。
+			mkdirSync(dirname(target), { recursive: true });
+			writeFileSync(target, windowsSource);
+			const result = syncUserConfig({ root, sourceRoot: dirname(directory) });
+			assert.equal(generateModule([]).source, EMPTY_MODULE);
+			assert.equal(result.changed, false);
+			assert.equal(readFileSync(target, "utf8"), windowsSource);
+		} finally {
+			rmSync(base, { recursive: true, force: true });
+		}
 	});
 
 	it("按领域标注类型，并把类型导入合并去重", () => {

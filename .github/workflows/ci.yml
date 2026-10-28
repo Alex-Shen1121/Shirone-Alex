@@ -85,6 +85,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: 同步博客内容与个人配置
+        run: pnpm content:sync
+
       - name: Run Biome
         continue-on-error: true
         run: pnpm exec biome ci ./src --reporter=github
@@ -115,6 +118,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: 同步博客内容与个人配置
+        run: pnpm content:sync
 
       - name: Check Astro diagnostics
         run: pnpm exec astro check
@@ -194,6 +200,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: 同步博客内容与个人配置
+        run: pnpm content:sync
 
       # Comments are off by default, so this run covers the zero-footprint cases.
       - name: Run comment, content and a11y regressions with comments disabled
@@ -299,6 +308,10 @@ jobs:
       - name: Install dependencies
         if: needs.changes.outputs.styles == 'true'
         run: pnpm install --frozen-lockfile
+
+      - name: 同步博客内容与个人配置
+        if: needs.changes.outputs.styles == 'true'
+        run: pnpm content:sync
 
       - name: Run style, banner and theme scheme regressions
         if: needs.changes.outputs.styles == 'true'

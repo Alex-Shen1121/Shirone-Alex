@@ -77,3 +77,19 @@ artifacts/lighthouse/*
 
 # generated AI skills plugin packages
 artifacts/shirone-ai-*
+
+# 由内容仓通过 pnpm content:sync 同步的文件
+/src/content/
+/src/data/*.ts
+/src/user/user-config.ts
+/src/config/FooterConfig.html
+/src/assets/images/
+/public/images/
+/public/assets/banner/
+/public/assets/music/
+/public/assets/projects/
+/public/assets/anime/*.webp
+
+# 由内容仓同步的游戏封面与站点图标
+/src/assets/games/
+/public/logo/
