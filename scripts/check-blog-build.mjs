@@ -20,7 +20,11 @@ assert.ok(
 	existsSync(join(dist, "pagefind/pagefind.js")),
 	"缺少生产搜索索引入口",
 );
-assert.match(read("rss.xml"), /你好，蛋壳宇宙/, "RSS 未包含首篇文章");
+assert.match(
+	read("rss.xml"),
+	/我是 AlexShen，在蛋壳宇宙记录技术与日常/,
+	"RSS 未包含自我介绍文章",
+);
 assert.doesNotMatch(
 	read("robots.txt"),
 	/Disallow:\s*\/_astro\//,

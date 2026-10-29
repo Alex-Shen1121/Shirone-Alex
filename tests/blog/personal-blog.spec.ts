@@ -29,20 +29,22 @@ test("手机搜索打开文章后收起面板，并更新标题与规范链接",
 	await page.getByRole("searchbox", { name: "搜索" }).fill("蛋壳");
 	await page
 		.locator("#search-panel a")
-		.filter({ hasText: "你好，蛋壳宇宙" })
+		.filter({ hasText: "我是 AlexShen，在蛋壳宇宙记录技术与日常" })
 		.click();
 	await expect(page).toHaveURL(/\/posts\/hello-universe\//);
 	await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-		"你好，蛋壳宇宙",
+		"我是 AlexShen，在蛋壳宇宙记录技术与日常",
 	);
 	await expect(page.locator("#search-panel")).toHaveClass(/float-panel-closed/);
 	await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
 		"href",
 		"https://blog.codingshen.top/posts/hello-universe/",
 	);
-	await page.getByRole("link", { name: "认识一下我", exact: true }).click();
-	await expect(page).toHaveURL(/\/about\//);
-	await expect(page.locator("#content-wrapper")).toContainText("AlexShen");
+	await page.getByRole("link", { name: "文章归档", exact: true }).click();
+	await expect(page).toHaveURL(/\/archive\//);
+	await expect(page.locator("#content-wrapper")).toContainText(
+		"我是 AlexShen，在蛋壳宇宙记录技术与日常",
+	);
 });
 
 for (const width of [390, 768, 1440]) {
