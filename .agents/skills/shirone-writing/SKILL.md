@@ -49,7 +49,7 @@ hideHomeContent: true   # 加密内容在首页隐藏(默认 true)
 - `published` 和 `updated` 是日历日期，使用 `YYYY-MM-DD`；它们决定文章归档与跨日排序。
 - 同一天发布多篇文章时，为每篇补充带时区偏移的 ISO 8601 `publishedAt`，例如 `2026-01-01T09:30:00+08:00`。列表会在置顶状态相同、`published` 相同的文章之间按该时间倒序排列。
 - `publishedAt` 必须落在 `siteConfig.timeZone` 解释后的 `published` 当天；修改日期时，`updatedAt` 也必须落在对应 `updated` 当天，且不能单独存在。
-- 脚手架 `pnpm.cmd new-post` 会按 `siteConfig.timeZone` 同时写入 `published` 与 `publishedAt`（两者必然同一天，与机器时区无关）；之后若改了 `published`，必须同步改 `publishedAt`，否则构建报错。内容分离模式下内容仓若覆盖了 `timeZone`，用 `SHIRONE_TZ=<IANA 时区>` 运行脚手架。
+- 脚手架 `pnpm.cmd new-post` 会按 `siteConfig.timeZone` 同时写入 `published` 与 `publishedAt`（两者必然同一天，与机器时区无关）；之后若改了 `published`，必须同步改 `publishedAt`，否则构建报错。内容分离模式直接读取内容仓的时区；需要临时覆盖时使用 `SHIRONE_TZ=<IANA 时区>`。
 - 未填写精确时间时保持兼容：同日文章以内容 ID 作稳定兜底排序。不要把 `published` 写成带时间的字符串；站点时区改用 `shirone-config` 配置。
 
 ## 系列(series)
@@ -67,13 +67,13 @@ hideHomeContent: true   # 加密内容在首页隐藏(默认 true)
 
 ## 工作流
 
-1. 脚手架:`pnpm.cmd new-post <filename>` 生成 `src/content/posts/<filename>.md` 骨架(含按站点时区算好的 `published` + `publishedAt`,见「日期与排序」);
+1. 脚手架:`pnpm.cmd new-post <filename>` 默认生成 `draft: true` 的草稿。单仓模式写入 `src/content/posts/`；本地双仓模式按挂载表直接写入 `CONTENT_DIR` 中的文章目录，并优先读取内容仓尚未同步的 `config/site.yaml` 时区。远端 Git 内容源会拒绝写入，须先配置本地 `CONTENT_DIR`。草稿包含按站点时区算好的 `published` + `publishedAt`（见「日期与排序」）；
 2. 写正文:自定义语法直接使用,无需任何启用开关(见 `shirone-markdown-syntax` 技能);图片可用相对路径引用同目录资源;
 3. 本地预览:`pnpm.cmd dev` 后访问 `http://localhost:4321`。
 
 ## 现成范例(demo 文章即文档)
 
-`src/content/posts/` 下的示例文章同时是语法文档,写作前可参考:`markdown.md`(基础)、`markdown-extended.md`(扩展语法)、`admonitions.md`、`spoilers.md`、`steps.md`、`option-groups.md`、`collapse-panels.md`、`marker-highlights.md`、`markdown-abbreviations.md`、`markdown-mermaid.md`、`expressive-code.md`、`encrypted-demo.md`(加密)、`video.md`、`image-grid-demo/`(图片画廊)、`markdown-includes.md`(文件包含)。
+主题示例的固定版本入口见 `docs/markdown-examples.md`，写作前可参考：`markdown.md`(基础)、`markdown-extended.md`(扩展语法)、`admonitions.md`、`spoilers.md`、`steps.md`、`option-groups.md`、`collapse-panels.md`、`marker-highlights.md`、`markdown-abbreviations.md`、`markdown-mermaid.md`、`expressive-code.md`、`encrypted-demo.md`(加密)、`video.md`、`image-grid-demo/`(图片画廊)、`markdown-includes.md`(文件包含)。
 
 ## 注意事项
 
