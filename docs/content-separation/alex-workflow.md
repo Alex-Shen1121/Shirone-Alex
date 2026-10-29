@@ -37,7 +37,9 @@ pnpm dev
 
 ## Vercel 连接
 
-Vercel 关联代码仓，构建命令为 `pnpm build`，输出目录为 `dist`。
+Vercel 项目为 [alex-shency/shirone-alex](https://vercel.com/alex-shency/shirone-alex)，关联代码仓 `main`，构建命令为 `pnpm build`，输出目录为 `dist`。
+
+正式地址为 [blog.codingshen.top](https://blog.codingshen.top/)。阿里云 DNS 中的 `blog` 使用 CNAME `72d7f0e2c81cce56.vercel-dns-017.com`，TTL 为 10 分钟；HTTPS 证书由 Vercel 自动管理。
 
 - 使用 Node.js 24，并设置 `ENABLE_EXPERIMENTAL_COREPACK=1`，让 Vercel 按 `package.json` 中的 `packageManager` 安装 pnpm，避免覆盖安装命令时落到旧版 pnpm。
 - 构建默认读取根目录 `shirone.content.json` 中的远端内容源；本地 `.env` 不提交，也不上传到 Vercel。
@@ -46,7 +48,7 @@ Vercel 关联代码仓，构建命令为 `pnpm build`，输出目录为 `dist`�
 - 私钥只用于构建期拉取内容；脚本将其写入权限为 `0600` 的临时文件，并在 Git 命令结束后清理。SSH 使用仓库内的 GitHub 官方主机公钥校验，不关闭主机验证。
 - 推送代码仓 `main` 会自动发布生产版本；其他代码分支用于预览，默认读取内容仓 `main`。
 - 内容仓的工作流会调用代码仓现有的内容校验流程。校验通过后，只有 `main` 分支会调用 `VERCEL_DEPLOY_HOOK`。
-- `VERCEL_DEPLOY_HOOK` 存放在内容仓的 GitHub Actions Secret 中。未配置时工作流会明确提示未部署。
+- `VERCEL_DEPLOY_HOOK` 存放在内容仓的 GitHub Actions Secret 中，对应 Vercel 的“内容仓主分支更新”钩子。配置缺失时工作流会失败，避免把内容校验通过误认为已经发布。
 - 部署钩子只请求一次新构建，不代表部署已经成功。简单钩子方案读取构建时的内容分支；精确重建历史发布时，应使用具体的 `CONTENT_REPO_REF` 提交号。
 
 构建生成的 `content.lock.json` 记录实际使用的内容提交号，可用于发布追溯。代码预览分支默认继续搭配内容仓 `main`，需要预览其他内容分支时显式设置 `CONTENT_REPO_REF`。
