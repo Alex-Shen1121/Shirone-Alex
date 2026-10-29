@@ -39,6 +39,7 @@ pnpm dev
 
 Vercel 关联代码仓，构建命令为 `pnpm build`，输出目录为 `dist`。
 
+- 使用 Node.js 24，并设置 `ENABLE_EXPERIMENTAL_COREPACK=1`，让 Vercel 按 `package.json` 中的 `packageManager` 安装 pnpm，避免覆盖安装命令时落到旧版 pnpm。
 - 构建默认读取根目录 `shirone.content.json` 中的远端内容源；本地 `.env` 不提交，也不上传到 Vercel。
 - Vercel 不应设置指向本机路径的 `CONTENT_DIR`。
 - 构建通过 SSH 的 443 端口读取私有内容仓。内容仓登记只读部署公钥，私钥以 `CONTENT_REPO_SSH_KEY` 保存到 Vercel 的生产、预览环境以及代码仓的 GitHub Actions Secret。
