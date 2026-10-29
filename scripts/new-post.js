@@ -1,7 +1,9 @@
-/* This is a script to create a new post markdown file with front-matter */
+/* 在真实内容源中创建文章草稿，避免写入会被同步覆盖的副本。 */
 
 import fs from "node:fs";
 import path from "node:path";
+import { parse as parseYaml } from "yaml";
+import { resolveContentSource } from "./content/resolve-source.mjs";
 
 /**
  * 站点时区（IANA 名）解析。
@@ -32,10 +34,19 @@ function readTimeZoneLiteral(file, { onlySiteDomain = false } = {}) {
 	return scope?.match(/\btimeZone\s*:\s*["'`]([^"'`]+)["'`]/)?.[1] ?? null;
 }
 
-function resolveSiteTimeZone() {
+function resolveSiteTimeZone(contentRoot) {
 	const override = process.env.SHIRONE_TZ?.trim();
 	if (override) return override;
+	if (contentRoot) {
+		for (const name of ["site.yaml", "site.yml"]) {
+			const file = path.join(contentRoot, "config", name);
+			if (!fs.existsSync(file)) continue;
+			const timeZone = parseYaml(fs.readFileSync(file, "utf8"))?.timeZone;
+			if (timeZone) return timeZone;
+		}
+	}
 	for (const [index, file] of SITE_TIME_ZONE_FILES.entries()) {
+		if (contentRoot && index === 0) continue;
 		const literal = readTimeZoneLiteral(file, { onlySiteDomain: index === 0 });
 		if (literal) return literal;
 	}
@@ -71,60 +82,97 @@ function getZonedNow(timeZone) {
 
 const args = process.argv.slice(2);
 
-if (args.length === 0) {
-	console.error(`Error: No filename argument provided
-Usage: npm run new-post -- <filename>`);
-	process.exit(1); // Terminate the script and return error code 1
+if (args.length !== 1) {
+	console.error("请提供文章文件名。用法：pnpm new-post <文件名>");
+	process.exit(1);
 }
 
 let fileName = args[0];
 
-// Add .md extension if not present
+// 允许子目录，但不能越出文章目录。
+if (path.isAbsolute(fileName) || fileName.split(/[\\/]/).includes("..")) {
+	console.error("文章文件名必须是文章目录内的相对路径，不能包含 ..。");
+	process.exit(1);
+}
+
+// 未指定扩展名时使用 Markdown。
 const fileExtensionRegex = /\.(md|mdx)$/i;
 if (!fileExtensionRegex.test(fileName)) {
 	fileName += ".md";
 }
 
-const targetDir = "./src/content/posts/";
+let contentRoot;
+let targetDir;
+try {
+	const source = resolveContentSource();
+	targetDir = path.resolve("src/content/posts");
+	if (source.mode === "external") {
+		if (source.source.type !== "path") {
+			throw new Error(
+				"当前使用远端内容仓。请先克隆内容仓并设置 CONTENT_DIR，再创建文章；不能写入同步副本。",
+			);
+		}
+		contentRoot = path.resolve(source.source.path);
+		if (
+			!fs.existsSync(contentRoot) ||
+			!fs.statSync(contentRoot).isDirectory()
+		) {
+			throw new Error("CONTENT_DIR 指向的内容目录不存在，请检查本地配置。");
+		}
+		const mount = Object.entries(source.mounts).find(([, destination]) => {
+			const remainder = path.relative(path.resolve(destination), targetDir);
+			return (
+				!path.isAbsolute(remainder) &&
+				remainder !== ".." &&
+				!remainder.startsWith(`..${path.sep}`)
+			);
+		});
+		if (!mount) throw new Error("内容源没有挂载文章目录，无法创建草稿。");
+		targetDir = path.resolve(
+			contentRoot,
+			mount[0],
+			path.relative(path.resolve(mount[1]), targetDir),
+		);
+	}
+} catch (error) {
+	console.error(`创建文章失败：${error.message}`);
+	process.exit(1);
+}
 const fullPath = path.join(targetDir, fileName);
 
 if (fs.existsSync(fullPath)) {
-	console.error(`Error: File ${fullPath} already exists `);
+	console.error(`文章已存在，不会覆盖：${fullPath}`);
 	process.exit(1);
 }
 
-// recursive mode creates multi-level directories
-const dirPath = path.dirname(fullPath);
-if (!fs.existsSync(dirPath)) {
-	fs.mkdirSync(dirPath, { recursive: true });
-}
-
 // 写入前先解析时区，非法配置不要留下半成品文件
-const timeZone = resolveSiteTimeZone();
+let timeZone;
 let zonedNow;
 try {
+	timeZone = resolveSiteTimeZone(contentRoot);
 	zonedNow = getZonedNow(timeZone);
-} catch {
+} catch (error) {
 	console.error(
-		`Error: invalid time zone "${timeZone}" (fix siteConfig.timeZone or set SHIRONE_TZ)`,
+		`无法解析站点时区 ${JSON.stringify(timeZone)}：${error.message}。请检查 site.yaml 或 SHIRONE_TZ。`,
 	);
 	process.exit(1);
 }
 
 // `published` 与 `publishedAt` 出自同一次时区换算，保证在站点时区下同一天
 const content = `---
-title: ${args[0]}
+title: ${JSON.stringify(args[0])}
 published: ${zonedNow.date}
 publishedAt: ${zonedNow.datetime}
 description: ''
 image: ''
 tags: []
 category: ''
-draft: false 
+draft: true
 lang: ''
 ---
 `;
 
-fs.writeFileSync(path.join(targetDir, fileName), content);
+fs.mkdirSync(path.dirname(fullPath), { recursive: true });
+fs.writeFileSync(fullPath, content, { flag: "wx" });
 
-console.log(`Post ${fullPath} created`);
+console.log(`已创建文章草稿：${fullPath}`);

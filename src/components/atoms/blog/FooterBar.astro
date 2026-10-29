@@ -40,7 +40,7 @@ const {
 	<div class="m3-blog-footer__inner">
 		{customHtml && <div class="m3-blog-footer__custom" set:html={customHtml} />}
 		<p class="m3-blog-footer__text">
-			&copy; {year} {name}. All Rights Reserved.
+			&copy; {year} {name}
 			{links.map((l) => (
 				<Fragment>
 					<span class="m3-blog-footer__sep" aria-hidden="true">/</span>
@@ -55,7 +55,6 @@ const {
 		</p>
 		{poweredBy.length > 0 && (
 			<p class="m3-blog-footer__text">
-				Powered by{" "}
 				{poweredBy.map((l, i) => (
 					<Fragment>
 						{i > 0 && <span class="m3-blog-footer__sep" aria-hidden="true">&amp;</span>}
@@ -71,7 +70,7 @@ const {
 					<Fragment>
 						<span class="m3-blog-footer__sep" aria-hidden="true">/</span>
 						<span class="m3-blog-footer__version">
-							<span>Version</span>
+							<span>v</span>
 							{versionHref ? (
 								<a
 									class="m3-blog-footer__link"

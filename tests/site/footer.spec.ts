@@ -13,6 +13,6 @@ test("footer exposes the source theme version from package metadata", async ({
 
 	await expect(versionLink).toHaveText(packageMetadata.version);
 	const versionGroup = versionLink.locator("xpath=..");
-	await expect(versionGroup.locator(":scope > span")).toHaveText("Version");
+	await expect(versionGroup.locator(":scope > span")).toHaveText("v");
 	await expect(versionGroup).toHaveCSS("gap", "6px");
 });

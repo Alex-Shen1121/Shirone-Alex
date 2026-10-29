@@ -166,7 +166,7 @@ $: if (initialized) {
 <!-- toggle btn for phone/tablet view -->
 <IconButton
     icon="material-symbols:search"
-    label="Search Panel"
+    label={i18n(I18nKey.search)}
     id="search-switch"
     size="small"
     shape="round"
@@ -180,6 +180,7 @@ $: if (initialized) {
     class="float-panel float-panel-closed absolute md:w-[30rem] top-20 left-4 md:left-[unset] right-4"
     bind:query={keywordMobile}
     results={panelResults}
+    onnavigate={() => setPanelVisibility(false, true)}
     placeholder={i18n(I18nKey.search)}
     hideInputOnDesktop
 />

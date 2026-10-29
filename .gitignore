@@ -11,6 +11,8 @@ dist/
 
 # content repository working copy, provenance, and safe cleanup backups
 .content-src/
+.theme-fixture/
+.theme-fixture-*/
 .content-backup/
 content.lock.json
 Shirone-Content/
@@ -88,6 +90,7 @@ artifacts/shirone-ai-*
 /public/assets/banner/
 /public/assets/music/
 /public/assets/projects/
+/public/assets/.gitkeep
 /public/assets/anime/*.webp
 
 # 由内容仓同步的游戏封面与站点图标

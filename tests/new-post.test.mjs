@@ -172,11 +172,102 @@ describe("scripts/new-post.js 的时区契约", () => {
 		withProject({ siteTimeZone: "Not/AZone" }, (root) => {
 			assert.throws(
 				() => scaffold(root, { name: "bad-tz" }),
-				/invalid time zone "Not\/AZone"/,
+				/无法解析站点时区 "Not\/AZone"/,
 			);
 			assert.equal(
 				existsSync(join(root, "src", "content", "posts", "bad-tz.md")),
 				false,
+			);
+		});
+	});
+});
+
+describe("新建文章的内容源契约", () => {
+	it("直接写入内容仓，使用尚未同步的时区，后续同步不会丢稿", () => {
+		withProject({ siteTimeZone: "UTC" }, (root) => {
+			const contentRoot = join(root, "content-source");
+			mkdirSync(join(contentRoot, "config"), { recursive: true });
+			writeFileSync(
+				join(contentRoot, "config/site.yaml"),
+				"timeZone: Asia/Shanghai\n",
+			);
+			writeFileSync(join(root, ".env"), `CONTENT_DIR="${contentRoot}"\n`);
+			execFileSync(process.execPath, [SCRIPT, "notes/第一篇"], {
+				cwd: root,
+				stdio: "pipe",
+			});
+			const post = join(contentRoot, "content/posts/notes/第一篇.md");
+			const text = readFileSync(post, "utf8");
+			assert.match(text, /draft: true/);
+			assert.match(text, /publishedAt: .*\+08:00/);
+			assert.equal(
+				existsSync(join(root, "src/content/posts/notes/第一篇.md")),
+				false,
+			);
+			// 同步夹具只测试文章目录；移除需要完整主题类型的配置覆盖。
+			rmSync(join(contentRoot, "config"), { recursive: true });
+			const sync = fileURLToPath(
+				new URL("../scripts/content/sync.mjs", import.meta.url),
+			);
+			execFileSync(process.execPath, [sync], { cwd: root, stdio: "pipe" });
+			assert.equal(readFileSync(post, "utf8"), text);
+			assert.equal(
+				readFileSync(join(root, "src/content/posts/notes/第一篇.md"), "utf8"),
+				text,
+			);
+		});
+	});
+
+	it("远端源拒绝写入同步副本，已有稿件不受影响", () => {
+		withProject({}, (root) => {
+			writeFileSync(
+				join(root, "shirone.content.json"),
+				JSON.stringify({
+					schemaVersion: 1,
+					source: {
+						type: "git",
+						url: "https://example.com/content.git",
+						ref: "main",
+					},
+				}),
+			);
+			assert.throws(() => scaffold(root), /请先克隆内容仓并设置 CONTENT_DIR/);
+			assert.equal(existsSync(join(root, "src/content/posts/post.md")), false);
+		});
+	});
+
+	it("尊重自定义文章挂载并拒绝越界文件名", () => {
+		withProject({}, (root) => {
+			const source = join(root, "writing");
+			mkdirSync(source);
+			writeFileSync(
+				join(root, "shirone.content.json"),
+				JSON.stringify({
+					schemaVersion: 1,
+					source: { type: "path", path: "writing" },
+					mounts: { content: false, articles: "src/content/posts" },
+				}),
+			);
+			execFileSync(process.execPath, [SCRIPT, "first"], {
+				cwd: root,
+				stdio: "pipe",
+			});
+			assert.ok(existsSync(join(source, "articles/first.md")));
+			assert.throws(
+				() =>
+					execFileSync(process.execPath, [SCRIPT, "../outside"], {
+						cwd: root,
+						stdio: "pipe",
+					}),
+				/不能包含/,
+			);
+			assert.throws(
+				() =>
+					execFileSync(process.execPath, [SCRIPT, "first"], {
+						cwd: root,
+						stdio: "pipe",
+					}),
+				/不会覆盖/,
 			);
 		});
 	});

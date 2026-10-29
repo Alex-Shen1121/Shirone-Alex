@@ -19,6 +19,7 @@ let {
 	query = $bindable(""),
 	placeholder = "",
 	hideInputOnDesktop = false,
+	onnavigate = () => {},
 	id = "",
 	class: className = "",
 }: {
@@ -26,6 +27,7 @@ let {
 	query?: string;
 	placeholder?: string;
 	hideInputOnDesktop?: boolean;
+	onnavigate?: () => void;
 	id?: string;
 	class?: string;
 } = $props();
@@ -42,7 +44,7 @@ let {
 		</div>
 	{/if}
 	{#each results as item, i (i)}
-		<a class="m3-blog-searchpanel__item" href={item.url}>
+		<a class="m3-blog-searchpanel__item" href={item.url} onclick={onnavigate}>
 			<span class="m3-blog-searchpanel__title">
 				{item.title}
 				<Icon icon="fa7-solid:chevron-right" />

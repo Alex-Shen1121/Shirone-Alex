@@ -1,5 +1,37 @@
-import type { AnimeItem } from "../data/anime.ts";
 import type { PageMeta } from "./pageMeta.ts";
+
+/** 收藏状态（Bangumi 领域通行五态） */
+export type AnimeStatus =
+	| "watching"
+	| "completed"
+	| "planned"
+	| "onHold"
+	| "dropped";
+
+export interface AnimeItem {
+	title: string;
+	/** 封面图地址（相对 /public 或绝对 URL）；省略 = 渐变占位 */
+	cover?: string;
+	/** 条目外链（Bangumi/官方站等）；省略则封面不可点 */
+	link?: string;
+	status: AnimeStatus;
+	/** 个人评分 0-10 */
+	rating: number;
+	/** 追番进度：已看 / 总集数（未知时可选省略） */
+	progress?: { watched: number; total: number };
+	/** 一句话感想 */
+	description?: string;
+	/** 放送年份（展示用） */
+	year: string;
+	/** 制作公司 */
+	studio?: string;
+	/** 题材标签 */
+	genres: string[];
+	/** 观看时间段（年-月） */
+	period?: { start: string; end: string };
+	/** 条目来源身份标识（可选，用于跨源去重与归档） */
+	identity?: AnimeIdentity;
+}
 
 /**
  * 支持的番剧外部数据服务提供方

@@ -1,9 +1,12 @@
 import assert from "node:assert/strict";
 import {
+	cpSync,
+	existsSync,
 	mkdirSync,
 	mkdtempSync,
 	readFileSync,
 	rmSync,
+	symlinkSync,
 	writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
@@ -336,6 +339,47 @@ describe("生成覆盖层模块", () => {
 describe("类型校验（真实 tsc，跑在本仓库上）", () => {
 	const repoRoot = fileURLToPath(new URL("../..", import.meta.url));
 	const generated = join(repoRoot, GENERATED_CONFIG_FILE);
+
+	it("首次检出尚无个人数据时，也能预检番剧关闭配置", () => {
+		const { base } = createConfigDirectory({ "anime.yaml": "enable: false\n" });
+		const isolated = join(base, "theme");
+		try {
+			mkdirSync(join(isolated, "src"), { recursive: true });
+			mkdirSync(join(isolated, "node_modules"));
+			cpSync(join(repoRoot, "src/types"), join(isolated, "src/types"), {
+				recursive: true,
+			});
+			symlinkSync(
+				join(repoRoot, "node_modules/typescript"),
+				join(isolated, "node_modules/typescript"),
+				"junction",
+			);
+			writeFileSync(
+				join(isolated, "tsconfig.json"),
+				JSON.stringify({
+					compilerOptions: {
+						strict: true,
+						target: "ES2022",
+						module: "ESNext",
+						moduleResolution: "Bundler",
+						baseUrl: ".",
+						paths: { "@/*": ["src/*"] },
+						ignoreDeprecations: "6.0",
+					},
+				}),
+			);
+			const result = syncUserConfig({
+				root: isolated,
+				sourceRoot: base,
+				dryRun: true,
+			});
+			assert.deepEqual(result.files, ["config/anime.yaml"]);
+			assert.equal(existsSync(join(isolated, "src/data")), false);
+			assert.equal(existsSync(join(isolated, GENERATED_CONFIG_FILE)), false);
+		} finally {
+			rmSync(base, { recursive: true, force: true });
+		}
+	});
 
 	/**
 	 * 用 `dryRun` 跑真实的生成 + 校验链路。

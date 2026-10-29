@@ -3,6 +3,7 @@ import {
 	existsSync,
 	mkdirSync,
 	readdirSync,
+	realpathSync,
 	statSync,
 	unlinkSync,
 	writeFileSync,
@@ -135,11 +136,16 @@ function overlayEsbuildPlugin(
 				// `resolveDir` is the importer's own directory, so for an entry
 				// override it equals `configDir` exactly rather than a subpath.
 				const dir = normalisePath(args.resolveDir);
-				const configRoot = normalisePath(paths.configDir);
+				// esbuild 会解析符号链接；macOS 的 /var 与 /private/var 必须使用同一条路径。
+				const configRoot = normalisePath(
+					existsSync(paths.configDir)
+						? realpathSync(paths.configDir)
+						: paths.configDir,
+				);
 				const fromUserConfig =
 					dir === configRoot || dir.startsWith(`${configRoot}/`);
 				if (!fromUserConfig) return undefined;
-				const relativeToConfig = relative(paths.configDir, args.resolveDir);
+				const relativeToConfig = relative(configRoot, dir);
 				const sibling = probeFile(
 					join(paths.packageSrc, "config", relativeToConfig, args.path),
 				);
