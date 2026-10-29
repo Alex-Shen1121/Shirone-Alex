@@ -1,5 +1,7 @@
 # 本博客的双仓工作流
 
+博客站名为「蛋壳宇宙」，作者署名为「AlexShen」。本文是双仓开发与发布的权威工作流，两个仓库的 `AGENTS.md` 均指向本文。
+
 代码仓：`Alex-Shen1121/Shirone-Alex`。内容仓：`Alex-Shen1121/Shirone-Content`，作为独立私有仓库维护，不再同步原内容仓上游。网站地址为 `https://blog.codingshen.top/`。
 
 ## 文件归属
@@ -34,6 +36,18 @@ pnpm dev
 ```
 
 持续写作时，另开一个终端运行 `pnpm content:watch`。提交文章时进入内容仓，提交主题代码时留在代码仓。
+
+创建文章时运行 `pnpm new-post <文件名>`。命令会直接在本地内容仓创建草稿，默认 `draft: true`；预览确认后再改为 `false`。远端 Git 模式下禁止向同步副本写稿，需要先配置本地 `CONTENT_DIR`。
+
+## 主题测试与个人内容分离
+
+用户明确要求保留原有全部模块、导航入口和侧栏组件。主题演示文章、动态、数据与素材继续保留在内容仓原有目录；它们不代表作者的真实经历，后续由作者逐步替换。不要以第一版精简为由移除或关闭模块。
+
+代码仓通过 `pnpm test:theme:prepare` 从已保留的公开主题基线 `dd1b7826af653a6db5429d5a9860ebfd9843bd46` 生成本地 `.theme-fixture/`，不读取个人内容。主题单元测试先用 `CONTENT_DIR=.theme-fixture pnpm content:sync` 准备数据；主题浏览器回归使用 `CONTENT_DIR=.theme-fixture`；GitHub Actions 为这些任务检出完整历史。测试完成后，用正常的 `CONTENT_DIR` 重新运行 `pnpm content:sync` 恢复个人站点。
+
+个人博客的生产验收运行 `pnpm build` 后执行 `node scripts/check-blog-build.mjs`，检查站名、署名、规范链接、搜索索引、草稿隔离和完整模块路由。
+
+浏览器验收先用 `pnpm preview --host 127.0.0.1 --port 4322` 启动生产预览，再运行 `pnpm test:blog`。如果端口被占用，以预览进程打印的实际地址为准，通过 `BLOG_PREVIEW_URL` 指定该地址。该验收覆盖原有模块、中文搜索后收起面板、页面跳转、三种屏幕宽度，以及浅色和深色模式下的无障碍。
 
 ## Vercel 连接
 

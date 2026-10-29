@@ -1,5 +1,14 @@
 # Agent Instructions for Shirone — M3E Blog Theme
 
+## 本个人博客的协作约定
+
+- 本代码仓服务于「蛋壳宇宙」，作者署名「AlexShen」，正式地址为 `https://blog.codingshen.top/`。
+- 开始内容、配置或发布工作前先读 `docs/content-separation/alex-workflow.md`。文章与个人配置编辑相邻私有内容仓 `Shirone-Content`；本仓中的内容为同步生成物。
+- 个人化优先使用内容仓的 YAML 覆盖；保留主题默认配置和双模式契约。
+- 用户明确要求保留原有全部功能模块、导航入口和侧栏组件，不以第一版精简为由删除或关闭模块。
+- 下文 `.cmd` 命令针对 Windows；macOS 使用对应的 `pnpm`、`npx`，本地构建对齐生产 Node.js 24。
+- 所有面向人的说明、注释、提交信息和文档使用简体中文。
+
 ## Summary
 
 Shirone is a blog theme built with Astro 7, Svelte 5, Tailwind 4, Stylus, and pnpm. It is refactored into an M3E (Material 3 Extended) component library with data-driven orchestration. In-site navigation uses Swup, so the persistent shell and the replaceable page container have different lifecycles. Development happens on Windows; use the `.cmd` suffix for package commands (`pnpm.cmd`, `npx.cmd`, `npm.cmd`).
