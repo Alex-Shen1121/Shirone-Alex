@@ -78,6 +78,8 @@ export type BannerConfig = {
 export type SiteConfig = {
 	site: string;
 	base?: string;
+	/** Vercel 访问统计；默认关闭，启用后在 Vercel 控制台查看访客数与浏览量。 */
+	vercelAnalytics?: { enable: boolean };
 	title: string;
 	subtitle: string;
 	/** 默认社交媒体分享预览图（og:image / twitter:image），支持本地相对路径或远程绝对链接。未配置时自动回退为第一张桌面版横幅壁纸。 */

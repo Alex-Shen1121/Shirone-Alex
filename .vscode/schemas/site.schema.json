@@ -15,6 +15,21 @@
         }
       ]
     },
+    "vercelAnalytics": {
+      "anyOf": [
+        {},
+        {
+          "type": "object",
+          "properties": {
+            "enable": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        }
+      ],
+      "description": "Vercel 访问统计；默认关闭，启用后在 Vercel 控制台查看访客数与浏览量。"
+    },
     "title": {
       "type": "string"
     },

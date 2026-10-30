@@ -117,6 +117,14 @@ const defaultSchemeStyle = createDefaultSchemeStyle();
 <!DOCTYPE html>
 <html lang={siteLang} class="bg-[var(--page-bg)] transition text-[14px] md:text-[16px]">
 	<head>
+		{siteConfig.vercelAnalytics?.enable === true && import.meta.env.PROD && (
+			<>
+				<script is:inline data-swup-ignore-script>
+					window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+				</script>
+				<script is:inline defer data-swup-ignore-script src="/_vercel/insights/script.js"></script>
+			</>
+		)}
 		<style is:inline>@layer properties, theme, base, components, utilities;</style>
 
 		<title>{pageTitle}</title>
