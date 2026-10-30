@@ -67,6 +67,16 @@ Vercel 项目为 [alex-shency/shirone-alex](https://vercel.com/alex-shency/shiro
 
 构建生成的 `content.lock.json` 记录实际使用的内容提交号，可用于发布追溯。代码预览分支默认继续搭配内容仓 `main`，需要预览其他内容分支时显式设置 `CONTENT_REPO_REF`。
 
+## Vercel 访问统计
+
+内容仓 `config/site.yaml` 中的 `vercelAnalytics.enable: true` 启用全站采集，主题默认关闭。关闭或省略时不输出统计脚本，`pnpm dev` 也不采集；修改配置后需重新构建部署。
+
+统计使用 [Vercel 官方脚本接入方式](https://vercel.com/docs/analytics/quickstart)，在持久布局中加载一次。脚本自动处理首次访问、Swup 的 `history.pushState` 和浏览器前进后退，不额外绑定 Swup 的上报事件，避免重复计算 PV。无需 API 密钥或新增 npm 依赖。
+
+在 [项目 Analytics 控制台](https://vercel.com/alex-shency/shirone-alex/analytics?environment=all) 启用 Web Analytics，部署后查看 Visitors（访客数）和 Page Views（浏览量）；正式博客数据可筛选 Production。该功能提供后台统计，不向博客页面公开访客计数，也不会补采启用前的历史访问。
+
+部署验收时访问首页、文章与归档，并检查浏览器网络中的 `/_vercel/insights/script.js` 和 `/_vercel/insights/view`。每次页面路径变化应上报一次，同页锚点跳转不增加 PV。广告拦截器和自动化浏览器可能阻止采集；本地预览不提供 Vercel 的采集端点。
+
 ## 发布前检查
 
 依次运行 `pnpm content:validate`、`pnpm content:sync`、`pnpm check`、`pnpm type-check`、`pnpm check:manifest` 和 `pnpm build`。内容同步测试与这些检查串行运行，避免测试夹具修改生成配置时相互干扰。

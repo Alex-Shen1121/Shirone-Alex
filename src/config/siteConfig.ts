@@ -12,6 +12,8 @@ import { withUserConfig } from "../utils/config-overlay.ts";
 export const siteConfig: SiteConfig = withUserConfig("site", {
 	site: "https://shirone.mysqil.com/",
 	base: "/",
+	// 需同时在 Vercel 项目的 Analytics 中启用，个人站点通过 config/site.yaml 覆盖。
+	vercelAnalytics: { enable: false },
 	title: "Shirone",
 	subtitle: "A Material 3 anime blog",
 	// 电脑端顶栏标题与导航内容区域："left" 左对齐，"center" 居中。
