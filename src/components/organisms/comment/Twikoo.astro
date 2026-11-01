@@ -56,10 +56,10 @@ const twikooStylus = `/* =======================================================
 					white-space: nowrap
 					border: 0
 
-			&:has(> .el-loading-mask:not([style*="none"])) > .twikoo-skeleton
+			&:has(> :is(.el-loading-mask, .tk-loading-mask):not([style*="none"])) > .twikoo-skeleton
 				display: flex !important
 
-		.tk-comments-container .el-loading-spinner
+		.tk-comments-container :is(.el-loading-spinner, .tk-loading-spinner)
 			display: none !important
 
 	.shirone-twikoo-wrapper .tk-comments
@@ -113,21 +113,21 @@ const twikooStylus = `/* =======================================================
 				color: var(--on-surface-variant) !important
 				opacity: 0.7
 
-		.el-input__count
+		:is(.el-input__count, .tk-input__count)
 			right: 1rem
 			bottom: 0.5rem
 			background: transparent
 			color: var(--on-surface-variant)
 			font: var(--m3e-type-label-small)
 
-	/* 3. 身份输入组：显式网格覆盖 Element UI 的 table 布局 */
+	/* 第三方样式边界：兼容 Twikoo 1.x 的 Element UI 与 2.x 的原生控件，沿用主题输入布局。 */
 	.shirone-twikoo-wrapper .tk-meta-input
 		display: grid !important
 		grid-template-columns: repeat(3, minmax(0, 1fr))
 		gap: var(--m3e-space-3, 0.75rem)
 		margin: 0 !important
 
-		> .el-input
+		> :is(.el-input, .tk-meta-input__item)
 			display: grid !important
 			grid-template-columns: max-content minmax(0, 1fr)
 			width: 100% !important
@@ -147,10 +147,10 @@ const twikooStylus = `/* =======================================================
 			&:has(input:invalid)
 				border-color: var(--error)
 
-			+ .el-input
+			+ :is(.el-input, .tk-meta-input__item)
 				margin: 0 !important
 
-			.el-input-group__prepend
+			:is(.el-input-group__prepend, .tk-input-group__prepend)
 				display: flex !important
 				align-items: center
 				width: auto
@@ -241,7 +241,7 @@ const twikooStylus = `/* =======================================================
 			background: var(--primary) !important
 			color: var(--on-primary) !important
 
-		.el-button + .el-button
+		:is(.el-button, .tk-button) + :is(.el-button, .tk-button)
 			margin-left: var(--m3e-space-2, 0.5rem)
 
 	.shirone-twikoo-wrapper .tk-submit:has(.tk-input textarea:placeholder-shown)
@@ -496,6 +496,7 @@ const twikooStyles = await new Promise<string>((resolve, reject) => {
 	data-twikoo-lang={resolvedLang}
 	data-twikoo-lazy={lazy ? "true" : "false"}
 	data-twikoo-placeholder={config.placeholder}
+	data-twikoo-editor-label={i18n(I18nKey.commentsEditor)}
 >
 	<!-- 初始加载与 Twikoo 运行时加载共用同一个 M3E 指示器 -->
 	<div class="twikoo-skeleton flex min-h-40 w-full flex-col items-center justify-center gap-3 py-6 text-sm text-[var(--on-surface-variant)]" role="status">
@@ -539,6 +540,35 @@ const twikooStyles = await new Promise<string>((resolve, reject) => {
 		}
 	}
 
+	const labelObservers = new Map<HTMLElement, MutationObserver>();
+
+	function bindFieldLabels(wrapper: HTMLElement) {
+		const update = () => {
+			// 复用第三方当前语言的可见标签，补齐输入框与标签之间的关联。
+			for (const field of wrapper.querySelectorAll<HTMLInputElement>(
+				"input:not([type=hidden]):not([type=file])",
+			)) {
+				const label = field
+					.closest(".el-input, .tk-input")
+					?.querySelector(".el-input-group__prepend, .tk-input-group__prepend")
+					?.textContent?.trim() || field.placeholder;
+				if (label && !field.hasAttribute("aria-label")) {
+					field.setAttribute("aria-label", label);
+				}
+			}
+			for (const field of wrapper.querySelectorAll<HTMLTextAreaElement>("textarea")) {
+				if (wrapper.dataset.twikooEditorLabel && !field.hasAttribute("aria-label")) {
+					field.setAttribute("aria-label", wrapper.dataset.twikooEditorLabel);
+				}
+			}
+		};
+		update();
+		const observer = new MutationObserver(update);
+		observer.observe(wrapper, { childList: true, subtree: true });
+		labelObservers.get(wrapper)?.disconnect();
+		labelObservers.set(wrapper, observer);
+	}
+
 	function initTwikooInstance(wrapper: HTMLElement) {
 		if (wrapper.dataset.twikooMounted === "true") return;
 
@@ -558,6 +588,7 @@ const twikooStyles = await new Promise<string>((resolve, reject) => {
 		const doInit = async () => {
 			try {
 				await loadScriptOnce(scriptUrl);
+				if (!wrapper.isConnected) return;
 				if (typeof window.twikoo?.init !== "function") {
 					throw new Error("Twikoo SDK not found on window");
 				}
@@ -571,6 +602,8 @@ const twikooStyles = await new Promise<string>((resolve, reject) => {
 					path: path || window.location.pathname,
 					lang: lang || "zh-CN",
 				});
+				if (!wrapper.isConnected) return;
+				bindFieldLabels(wrapper);
 
 				const textarea = wrapper.querySelector<HTMLTextAreaElement>(
 					".tk-input textarea",
@@ -611,6 +644,12 @@ const twikooStyles = await new Promise<string>((resolve, reject) => {
 	}
 
 	function setupAllTwikoo() {
+		for (const [wrapper, observer] of labelObservers) {
+			if (!wrapper.isConnected) {
+				observer.disconnect();
+				labelObservers.delete(wrapper);
+			}
+		}
 		const wrappers = document.querySelectorAll<HTMLElement>(
 			".shirone-twikoo-wrapper",
 		);

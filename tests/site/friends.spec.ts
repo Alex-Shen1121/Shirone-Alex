@@ -46,6 +46,9 @@ test.describe("友链页", () => {
 		await expect(page.locator(".page-header__subtitle")).toContainText(
 			"Link exchange",
 		);
+		// 未配置交换资料和评论时，继续只输出主题原有友链列表。
+		await expect(page.locator(".friend-exchange")).toHaveCount(0);
+		await expect(page.locator("#comments")).toHaveCount(0);
 	});
 
 	test("筛选状态同步到 URL（?q= / ?tag=）", async ({ page }) => {

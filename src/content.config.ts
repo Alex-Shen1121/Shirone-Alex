@@ -76,7 +76,37 @@ const postsCollection = defineCollection({
 
 const specCollection = defineCollection({
 	loader: glob({ base: "./src/content/spec", pattern: "**/*.{md,mdx}" }),
-	schema: z.object({}),
+	schema: z.object({
+		/** 友链页的可选名片与申请说明；文案由内容仓维护。 */
+		friendExchange: z
+			.object({
+				cardTitle: z.string(),
+				name: z.string(),
+				author: z.string(),
+				description: z.string(),
+				avatar: z.string(),
+				avatarAlt: z.string(),
+				fields: z.array(z.object({ label: z.string(), value: z.string() })),
+				copyLabel: z.string(),
+				copyAllLabel: z.string(),
+				manualCopyLabel: z.string(),
+				applicationTitle: z.string(),
+				applicationIntro: z.string(),
+				steps: z.array(
+					z.object({ title: z.string(), description: z.string() }),
+				),
+				commentLabel: z.string(),
+				templateLabel: z.string(),
+				templatePreviewLabel: z.string(),
+				template: z.string(),
+				privacyNote: z.string(),
+				notesTitle: z.string(),
+				notes: z.array(
+					z.object({ title: z.string(), description: z.string() }),
+				),
+			})
+			.optional(),
+	}),
 });
 
 /**

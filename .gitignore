@@ -96,3 +96,6 @@ artifacts/shirone-ai-*
 # 由内容仓同步的游戏封面与站点图标
 /src/assets/games/
 /public/logo/
+
+# 由内容仓同步的第三方客户端文件
+/public/vendor/

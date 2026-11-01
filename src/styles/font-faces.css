@@ -3,7 +3,8 @@
     --font-body-fallback: ui-sans-serif, system-ui, sans-serif;
     --font-cjk-fallback: system-ui, sans-serif;
     --m3e-font-mono-fallback: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    --m3e-font-sans: var(--font-body), var(--font-cjk), var(--font-body-fallback), "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
+    /* 未配置补充字体时也保留有效字体栈，避免字号等整组排版令牌失效。 */
+    --m3e-font-sans: var(--font-body, var(--font-body-fallback)), var(--font-cjk, var(--font-cjk-fallback)), var(--font-body-fallback), "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
     --font-sans: var(--m3e-font-sans);
     /* Astro Fonts owns --font-mono when a custom mono role is enabled. When a
        mono-cjk supplement is configured, Layout emits --m3e-font-mono-stack and

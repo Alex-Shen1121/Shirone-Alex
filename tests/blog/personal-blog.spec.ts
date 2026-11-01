@@ -32,6 +32,7 @@ test("手机搜索打开文章后收起面板，并更新标题与规范链接",
 		.filter({ hasText: "我是 AlexShen，在蛋壳宇宙记录技术与日常" })
 		.click();
 	await expect(page).toHaveURL(/\/posts\/hello-universe\//);
+	await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
 	await expect(page.getByRole("heading", { level: 1 })).toHaveText(
 		"我是 AlexShen，在蛋壳宇宙记录技术与日常",
 	);

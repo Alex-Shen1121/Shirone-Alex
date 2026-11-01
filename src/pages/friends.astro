@@ -1,8 +1,14 @@
 ---
+import { getCollection, render } from "astro:content";
+import FriendExchange from "@components/organisms/FriendExchange.svelte";
 import FriendSection from "@components/organisms/FriendSection.svelte";
+import CommentSection from "@components/organisms/comment/CommentSection.astro";
 import I18nKey from "@i18n/i18nKey";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
 import { resolveI18nText } from "@utils/i18n-utils";
+import { getMarkdownStylesheetAssets } from "@utils/markdown-assets";
+import { url } from "@utils/url-utils";
+import { commentConfig, resolveCommentOptions, siteConfig } from "@/config";
 import { friendsConfig } from "@/config/friendsConfig";
 import { getFriendsList } from "../data/friends";
 
@@ -15,8 +21,37 @@ const pageDescription = resolveI18nText(
 	friendsConfig.description,
 	I18nKey.friendsBanner,
 );
+const hasComments = Boolean(resolveCommentOptions(commentConfig));
+
+// 友链说明由内容仓维护；未提供说明时保留主题原有页面。
+const introduction = (await getCollection("spec")).find(
+	(entry) => entry.id === "friends",
+);
+const rendered = introduction ? await render(introduction) : undefined;
+const Content = rendered?.Content;
+const Markdown = rendered
+	? (await import("@components/content/Markdown.astro")).default
+	: undefined;
+const markdownStylesheetAssets = rendered
+	? await getMarkdownStylesheetAssets(
+			rendered.remarkPluginFrontmatter.markdownSyntaxes,
+		)
+	: [];
+const exchange = introduction?.data.friendExchange;
 ---
 
-<MainGridLayout title={pageTitle} description={pageDescription} page="friends">
-    <FriendSection friends={getFriendsList()} title={pageTitle} subtitle={pageDescription} client:visible></FriendSection>
+<MainGridLayout title={pageTitle} description={pageDescription} page="friends" hasComments={hasComments}>
+    {markdownStylesheetAssets.map(({ pack, css }) => <style is:inline slot="head" data-swup-optional={pack} set:html={css}></style>)}
+    {Content && Markdown ? (
+        <FriendSection friends={getFriendsList()} title={pageTitle} subtitle={pageDescription} client:visible>
+            <Markdown class="friend-introduction"><Content /></Markdown>
+        </FriendSection>
+    ) : (
+        <FriendSection friends={getFriendsList()} title={pageTitle} subtitle={pageDescription} client:visible />
+    )}
+    {exchange && <FriendExchange data={exchange} hasComments={hasComments} client:visible />}
+    <CommentSection
+        context={{ key: "page:friends", path: url("/friends/"), title: pageTitle, language: siteConfig.lang }}
+        class="mt-4"
+    />
 </MainGridLayout>

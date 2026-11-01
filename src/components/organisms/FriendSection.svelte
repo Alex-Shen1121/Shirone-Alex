@@ -8,17 +8,20 @@ import PageHeader from "@components/molecules/PageHeader.svelte";
 import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
 import Icon from "@iconify/svelte";
-import { onMount } from "svelte";
+import { onMount, type Snippet } from "svelte";
 import type { FriendItem } from "../../data/friends";
 
 let {
 	friends = [] as FriendItem[],
 	title = i18n(I18nKey.friends),
 	subtitle = i18n(I18nKey.friendsBanner),
+	children,
 }: {
 	friends?: FriendItem[];
 	title?: string;
 	subtitle?: string;
+	/** 可选的站点介绍与交换说明，由页面传入静态内容。 */
+	children?: Snippet;
 } = $props();
 
 let query = $state("");
@@ -105,6 +108,7 @@ onMount(() => {
 		{title}
 		{subtitle}
 	/>
+	{@render children?.()}
 
 	{#if friends.length > 0}
 		<div class="friend-section__tools">
