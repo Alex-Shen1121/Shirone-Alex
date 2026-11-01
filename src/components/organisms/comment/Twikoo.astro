@@ -120,19 +120,22 @@ const twikooStylus = `/* =======================================================
 			color: var(--on-surface-variant)
 			font: var(--m3e-type-label-small)
 
-	/* 第三方样式边界：兼容 Twikoo 1.x 的 Element UI 与 2.x 的原生控件，沿用主题输入布局。 */
+	/* 第三方样式边界：覆盖 Twikoo 1.x/2.x 控件；使用普通选择器列表，避免 Stylus 拆开嵌套 :is() 的逗号。 */
 	.shirone-twikoo-wrapper .tk-meta-input
 		display: grid !important
 		grid-template-columns: repeat(3, minmax(0, 1fr))
 		gap: var(--m3e-space-3, 0.75rem)
 		margin: 0 !important
 
-		> :is(.el-input, .tk-meta-input__item)
+		> .el-input,
+		> .tk-meta-input__item
 			display: grid !important
 			grid-template-columns: max-content minmax(0, 1fr)
+			align-items: stretch
 			width: 100% !important
 			height: 3rem
 			min-width: 0
+			margin: 0 !important
 			overflow: hidden
 			border: 1px solid var(--outline-variant)
 			border-radius: var(--shape-corner-m)
@@ -147,21 +150,19 @@ const twikooStylus = `/* =======================================================
 			&:has(input:invalid)
 				border-color: var(--error)
 
-			+ :is(.el-input, .tk-meta-input__item)
-				margin: 0 !important
-
-			:is(.el-input-group__prepend, .tk-input-group__prepend)
+			.el-input-group__prepend,
+			.tk-input-group__prepend
 				display: flex !important
 				align-items: center
 				width: auto
+				height: 100%
 				min-width: 0
 				min-height: 0
 				padding: 0 var(--m3e-space-3, 0.75rem) !important
 				border: none !important
-				border-right: 1px solid var(--outline-variant) !important
 				border-radius: 0 !important
-				background: var(--surface-container) !important
-				color: var(--on-surface-variant) !important
+				background: transparent !important
+				color: var(--on-surface) !important
 				font: var(--m3e-type-label-medium)
 				white-space: nowrap
 
@@ -185,7 +186,7 @@ const twikooStylus = `/* =======================================================
 
 				&::placeholder
 					color: var(--on-surface-variant) !important
-					opacity: 0.7
+					opacity: 1
 
 	@media (max-width: 767px)
 		.shirone-twikoo-wrapper .tk-meta-input
