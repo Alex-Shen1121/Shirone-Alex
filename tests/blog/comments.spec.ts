@@ -18,7 +18,7 @@ test.beforeEach(async ({ page }) => {
 
 for (const theme of ["light", "dark"]) {
 	for (const width of [390, 1194, 1440]) {
-		test(`${theme} / ${width}：评论字段对齐且标签没有独立底板`, async ({
+		test(`${theme} / ${width}：评论字段对齐且标签具有浅色边框`, async ({
 			page,
 		}, testInfo) => {
 			await page.addInitScript(
@@ -87,12 +87,16 @@ for (const theme of ["light", "dark"]) {
 				for (const field of await fields.all()) {
 					const label = field.locator(".tk-input-group__prepend");
 					await expect(label).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
-					await expect(label).toHaveCSS("border-right-width", "0px");
+					await expect(label).toHaveCSS("border-width", "1px");
+					await expect(label).toHaveCSS("border-style", "solid");
 					const labelBox = await label.boundingBox();
 					const inputBox = await field.locator("input").boundingBox();
 					if (!labelBox || !inputBox) throw new Error("评论字段不可见");
-					expect(labelBox.y).toBe(inputBox.y);
-					expect(labelBox.height).toBe(inputBox.height);
+					expect(labelBox.y + labelBox.height / 2).toBeCloseTo(
+						inputBox.y + inputBox.height / 2,
+						0,
+					);
+					expect(labelBox.height).toBeLessThan(inputBox.height);
 				}
 				const result = await new AxeBuilder({ page })
 					.include(".tk-meta-input")

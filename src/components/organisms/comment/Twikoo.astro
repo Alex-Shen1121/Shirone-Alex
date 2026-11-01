@@ -154,13 +154,15 @@ const twikooStylus = `/* =======================================================
 			.tk-input-group__prepend
 				display: flex !important
 				align-items: center
+				align-self: center
 				width: auto
-				height: 100%
+				height: auto
 				min-width: 0
 				min-height: 0
-				padding: 0 var(--m3e-space-3, 0.75rem) !important
-				border: none !important
-				border-radius: 0 !important
+				margin-left: var(--m3e-space-2, 0.5rem)
+				padding: var(--m3e-space-1, 0.25rem) var(--m3e-space-2, 0.5rem) !important
+				border: 1px solid unquote("color-mix(in srgb, var(--outline-variant) 70%, transparent)") !important
+				border-radius: var(--shape-corner-s) !important
 				background: transparent !important
 				color: var(--on-surface) !important
 				font: var(--m3e-type-label-medium)
